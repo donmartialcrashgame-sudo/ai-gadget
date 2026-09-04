@@ -1,95 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Game API AI</title>
-  <style>
-    * { box-sizing: border-box; }
-    body { margin: 0; font-family: Arial, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
-    .chat { width: 100%; max-width: 720px; height: 720px; max-height: 90vh; background: #111827; border: 1px solid #334155; border-radius: 18px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,.35); }
-    header { padding: 20px; border-bottom: 1px solid #334155; }
-    header h1 { margin: 0 0 5px; font-size: 22px; }
-    header p { margin: 0; color: #94a3b8; font-size: 14px; }
-    #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
-    .msg { max-width: 85%; padding: 12px 15px; border-radius: 14px; line-height: 1.5; white-space: pre-wrap; }
-    .user { align-self: flex-end; background: #2563eb; color: white; }
-    .assistant { align-self: flex-start; background: #1e293b; }
-    .error { align-self: flex-start; background: #451a1a; color: #fecaca; }
-    form { display: flex; gap: 10px; padding: 15px; border-top: 1px solid #334155; }
-    textarea { flex: 1; resize: none; min-height: 52px; max-height: 140px; padding: 14px; border: 1px solid #475569; border-radius: 12px; background: #0f172a; color: white; outline: none; font: inherit; }
-    button { border: 0; border-radius: 12px; padding: 0 22px; background: #2563eb; color: white; font-weight: bold; cursor: pointer; }
-    button:disabled { opacity: .6; cursor: wait; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game API AI</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#060914;color:#f8fafc}body{min-height:100vh;display:flex;justify-content:center;align-items:center;padding:18px;background:radial-gradient(circle at 15% 10%,rgba(59,130,246,.18),transparent 35%),radial-gradient(circle at 85% 90%,rgba(124,58,237,.16),transparent 35%),#060914}.app{width:min(900px,100%);height:min(820px,94vh);display:flex;flex-direction:column;overflow:hidden;border:1px solid rgba(148,163,184,.2);border-radius:26px;background:rgba(15,23,42,.82);backdrop-filter:blur(20px);box-shadow:0 30px 90px rgba(0,0,0,.45)}header{display:flex;align-items:center;gap:14px;padding:20px 22px;border-bottom:1px solid rgba(148,163,184,.15)}.logo{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(135deg,#2563eb,#7c3aed);box-shadow:0 8px 25px rgba(37,99,235,.3);font-size:23px}.title h1{margin:0;font-size:19px}.title p{margin:3px 0 0;color:#94a3b8;font-size:13px}.status{margin-left:auto;display:flex;align-items:center;gap:7px;color:#94a3b8;font-size:12px}.dot{width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 12px #22c55e}#messages{flex:1;overflow-y:auto;padding:28px 24px;display:flex;flex-direction:column;gap:18px;scroll-behavior:smooth}.welcome{margin:auto;text-align:center;max-width:520px}.welcome h2{font-size:30px;margin:0 0 10px}.welcome p{color:#94a3b8;line-height:1.6;margin:0}.msg{display:flex;gap:10px;max-width:82%;animation:appear .25s ease}.msg.user{align-self:flex-end;flex-direction:row-reverse}.avatar{flex:0 0 34px;width:34px;height:34px;border-radius:11px;display:grid;place-items:center;font-size:15px}.assistant .avatar{background:linear-gradient(135deg,#2563eb,#7c3aed)}.user .avatar{background:#334155}.bubble{padding:13px 15px;border-radius:17px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}.assistant .bubble{background:#172033;border:1px solid rgba(148,163,184,.12);border-top-left-radius:5px}.user .bubble{background:#2563eb;border-top-right-radius:5px}.error .bubble{background:#451a1a;color:#fecaca}.typing{display:flex;align-items:center;gap:10px}.typing .bubble{display:flex;gap:5px;padding:15px 17px}.typing span{width:7px;height:7px;border-radius:50%;background:#94a3b8;animation:bounce 1.2s infinite}.typing span:nth-child(2){animation-delay:.15s}.typing span:nth-child(3){animation-delay:.3s}@keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:.35}30%{transform:translateY(-5px);opacity:1}}@keyframes appear{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}form{display:flex;gap:10px;padding:16px;border-top:1px solid rgba(148,163,184,.15);background:rgba(2,6,23,.35)}textarea{flex:1;resize:none;height:54px;max-height:140px;padding:15px 16px;border:1px solid #334155;border-radius:16px;outline:none;background:#0b1220;color:#fff;font:inherit;line-height:1.4}textarea:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.12)}button{width:58px;border:0;border-radius:16px;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;font-size:20px;cursor:pointer;box-shadow:0 8px 22px rgba(37,99,235,.25)}button:hover{filter:brightness(1.1)}button:disabled{opacity:.55;cursor:wait}@media(max-width:600px){body{padding:0}.app{height:100vh;border-radius:0}.msg{max-width:92%}#messages{padding:22px 14px}.welcome h2{font-size:25px}}
+</style>
 </head>
 <body>
-  <main class="chat">
-    <header>
-      <h1>Game API AI</h1>
-      <p>Ask the AI a question and test its responses.</p>
-    </header>
-    <section id="messages">
-      <div class="msg assistant">Hello! I'm your AI assistant. Ask me anything.</div>
-    </section>
-    <form id="chatForm">
-      <textarea id="message" placeholder="Type your question..." required></textarea>
-      <button id="send" type="submit">Send</button>
-    </form>
-  </main>
-
-  <script>
-    const API_URL = 'https://ai-backend-4-2lz9.onrender.com/api/chat';
-    const messagesEl = document.getElementById('messages');
-    const form = document.getElementById('chatForm');
-    const input = document.getElementById('message');
-    const send = document.getElementById('send');
-    const history = [];
-
-    function addMessage(text, role) {
-      const div = document.createElement('div');
-      div.className = `msg ${role}`;
-      div.textContent = text;
-      messagesEl.appendChild(div);
-      messagesEl.scrollTop = messagesEl.scrollHeight;
-    }
-
-    form.addEventListener('submit', async (event) => {
-      event.preventDefault();
-      const message = input.value.trim();
-      if (!message || send.disabled) return;
-
-      addMessage(message, 'user');
-      history.push({ role: 'user', content: message });
-      input.value = '';
-      send.disabled = true;
-      send.textContent = '...';
-
-      try {
-        const response = await fetch(API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message, history: history.slice(-7, -1) })
-        });
-        const data = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(data.detail || `Request failed (${response.status})`);
-        addMessage(data.reply, 'assistant');
-        history.push({ role: 'assistant', content: data.reply });
-      } catch (error) {
-        addMessage(`Error: ${error.message}`, 'error');
-        history.pop();
-      } finally {
-        send.disabled = false;
-        send.textContent = 'Send';
-        input.focus();
-      }
-    });
-
-    input.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter' && !event.shiftKey) {
-        event.preventDefault();
-        form.requestSubmit();
-      }
-    });
-  </script>
+<main class="app">
+<header><div class="logo">✦</div><div class="title"><h1>Game API AI</h1><p>Your intelligent game API assistant</p></div><div class="status"><i class="dot"></i> Online</div></header>
+<section id="messages"><div class="welcome" id="welcome"><h2>How can I help you?</h2><p>Ask me about Game API, integrations, documentation, or anything you want to test.</p></div></section>
+<form id="chatForm"><textarea id="message" placeholder="Message Game API AI..." required></textarea><button id="send" type="submit" aria-label="Send">➤</button></form>
+</main>
+<script>
+const API_URL='https://ai-backend-4-2lz9.onrender.com/api/chat';
+const messagesEl=document.getElementById('messages'),form=document.getElementById('chatForm'),input=document.getElementById('message'),send=document.getElementById('send');
+const history=[];
+function removeWelcome(){const w=document.getElementById('welcome');if(w)w.remove()}
+function addMessage(text,role){removeWelcome();const row=document.createElement('div');row.className=`msg ${role}`;const avatar=document.createElement('div');avatar.className='avatar';avatar.textContent=role==='user'?'U':'✦';const bubble=document.createElement('div');bubble.className='bubble';bubble.textContent=text;row.append(avatar,bubble);messagesEl.appendChild(row);messagesEl.scrollTop=messagesEl.scrollHeight}
+function showTyping(){removeWelcome();const row=document.createElement('div');row.id='typing';row.className='msg assistant typing';row.innerHTML='<div class="avatar">✦</div><div class="bubble"><span></span><span></span><span></span></div>';messagesEl.appendChild(row);messagesEl.scrollTop=messagesEl.scrollHeight}
+function hideTyping(){document.getElementById('typing')?.remove()}
+form.addEventListener('submit',async e=>{e.preventDefault();const message=input.value.trim();if(!message||send.disabled)return;addMessage(message,'user');history.push({role:'user',content:message});input.value='';send.disabled=true;showTyping();try{const response=await fetch(API_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message,history:history.slice(-7,-1)})});const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.detail||`Request failed (${response.status})`);hideTyping();addMessage(data.reply,'assistant');history.push({role:'assistant',content:data.reply})}catch(error){hideTyping();addMessage(`Sorry, I couldn't connect to the AI right now. ${error.message}`,'error');history.pop()}finally{send.disabled=false;input.focus()}});
+input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();form.requestSubmit()}});
+</script>
 </body>
 </html>
