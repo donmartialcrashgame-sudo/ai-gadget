@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game API AI</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Arial, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .chat { width: 100%; max-width: 720px; height: 720px; max-height: 90vh; background: #111827; border: 1px solid #334155; border-radius: 18px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,.35); }
+    header { padding: 20px; border-bottom: 1px solid #334155; }
+    header h1 { margin: 0 0 5px; font-size: 22px; }
+    header p { margin: 0; color: #94a3b8; font-size: 14px; }
+    #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+    .msg { max-width: 85%; padding: 12px 15px; border-radius: 14px; line-height: 1.5; white-space: pre-wrap; }
+    .user { align-self: flex-end; background: #2563eb; color: white; }
+    .assistant { align-self: flex-start; background: #1e293b; }
+    .error { align-self: flex-start; background: #451a1a; color: #fecaca; }
+    form { display: flex; gap: 10px; padding: 15px; border-top: 1px solid #334155; }
+    textarea { flex: 1; resize: none; min-height: 52px; max-height: 140px; padding: 14px; border: 1px solid #475569; border-radius: 12px; background: #0f172a; color: white; outline: none; font: inherit; }
+    button { border: 0; border-radius: 12px; padding: 0 22px; background: #2563eb; color: white; font-weight: bold; cursor: pointer; }
+    button:disabled { opacity: .6; cursor: wait; }
+  </style>
+</head>
+<body>
+  <main class="chat">
+    <header>
+      <h1>Game API AI</h1>
+      <p>Ask the AI a question and test its responses.</p>
+    </header>
+    <section id="messages">
+      <div class="msg assistant">Hello! I'm your AI assistant. Ask me anything.</div>
+    </section>
+    <form id="chatForm">
+      <textarea id="message" placeholder="Type your question..." required></textarea>
+      <button id="send" type="submit">Send</button>
+    </form>
+  </main>
+
+  <script>
+    const API_URL = 'https://ai-backend-4-2lz9.onrender.com/api/chat';
+    const messagesEl = document.getElementById('messages');
+    const form = document.getElementById('chatForm');
+    const input = document.getElementById('message');
+    const send = document.getElementById('send');
+    const history = [];
+
+    function addMessage(text, role) {
+      const div = document.createElement('div');
+      div.className = `msg ${role}`;
+      div.textContent = text;
+      messagesEl.appendChild(div);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const message = input.value.trim();
+      if (!message || send.disabled) return;
+
+      addMessage(message, 'user');
+      history.push({ role: 'user', content: message });
+      input.value = '';
+      send.disabled = true;
+      send.textContent = '...';
+
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message, history: history.slice(-7, -1) })
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.detail || `Request failed (${response.status})`);
+        addMessage(data.reply, 'assistant');
+        history.push({ role: 'assistant', content: data.reply });
+      } catch (error) {
+        addMessage(`Error: ${error.message}`, 'error');
+        history.pop();
+      } finally {
+        send.disabled = false;
+        send.textContent = 'Send';
+        input.focus();
+      }
+    });
+
+    input.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        form.requestSubmit();
+      }
+    });
+  </script>
+</body>
+</html>
